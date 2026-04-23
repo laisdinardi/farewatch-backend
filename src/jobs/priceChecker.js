@@ -1,7 +1,7 @@
 const { supabase } = require('../../config/supabase');
 const { getBestPrice } = require('../services/flightService');
 const { storePriceObservation, analyzePrice } = require('../services/priceAnalyzer');
-const { dispatchDealAlert } = require('../services/notificationService');
+const { dispatchDealAlert } = require('../services/notificationservice');
 const { logger } = require('../utils/logger');
 
 let isRunning = false;
