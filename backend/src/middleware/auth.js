@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { supabase } = require('../../config/supabase');
+const { supabase } = require('../../../config/supabase');
 const { logger } = require('../utils/logger');
 
 async function authenticate(req, res, next) {
