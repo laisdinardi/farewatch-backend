@@ -17,6 +17,9 @@ const telegramRoutes = require('./routes/telegram');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+app.use('/notifications', notificationsRoutes);
+app.use('/telegram', telegramRoutes);
+
 // Security Middleware
 app.use(helmet());
 app.use(cors({
