@@ -1,5 +1,5 @@
 const express = require('express');
-const { supabase } = require('../../../config/supabase');
+const { supabase } = require('../../config/supabase');
 const { authenticate } = require('../middleware/auth');
 const { searchFlights } = require('../services/flightService');
 const { getBaseline } = require('../services/priceAnalyzer');

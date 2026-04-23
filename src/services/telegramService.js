@@ -1,5 +1,5 @@
 const TelegramBot = require('node-telegram-bot-api');
-const { supabase } = require('../../../config/supabase');
+const { supabase } = require('../../config/supabase');
 const { logger } = require('../utils/logger');
 const crypto = require('crypto');
 

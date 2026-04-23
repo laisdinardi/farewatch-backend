@@ -1,4 +1,4 @@
-const { supabase } = require('../../../config/supabase');
+const { supabase } = require('../../config/supabase');
 const { logger } = require('../utils/logger');
 
 const ALERT_THRESHOLD_50 = 0.5;  // 50% below baseline

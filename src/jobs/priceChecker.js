@@ -1,4 +1,4 @@
-const { supabase } = require('../../../config/supabase');
+const { supabase } = require('../../config/supabase');
 const { getBestPrice } = require('../services/flightService');
 const { storePriceObservation, analyzePrice } = require('../services/priceAnalyzer');
 const { dispatchDealAlert } = require('../services/notificationService');

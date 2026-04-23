@@ -1,6 +1,6 @@
 const express = require('express');
 const { z } = require('zod');
-const { supabase } = require('../../../config/supabase');
+const { supabase } = require('../../config/supabase');
 const { authenticate } = require('../middleware/auth');
 const { logger } = require('../utils/logger');
 
