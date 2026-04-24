@@ -23,8 +23,8 @@ async function runPriceCheck() {
       .select(`
         *,
         users!inner(
-          id, email, name, 
-          notify_email, notify_telegram, 
+          id, email, name,
+          notify_email, notify_telegram,
           telegram_chat_id,
           alert_threshold_20, alert_threshold_50
         )
@@ -37,15 +37,20 @@ async function runPriceCheck() {
       return;
     }
 
-    logger.info(`Processing ${routes?.length || 0} active routes`);
+    if (!routes || routes.length === 0) {
+      logger.warn('No tracked routes found, skipping price check');
+      return;
+    }
+
+    logger.info(`Processing ${routes.length} active routes`);
 
     let dealsFound = 0;
     let alertsSent = 0;
 
-    for (const route of (routes || [])) {
+    for (const route of routes) {
       try {
         await processRoute(route, route.users);
-        
+
         // Rate limiting: small delay between requests
         await new Promise((r) => setTimeout(r, 1500));
       } catch (err) {
@@ -77,7 +82,6 @@ async function processRoute(route, user) {
     return;
   }
 
-  // Store price in history
   await storePriceObservation({
     origin: route.origin_iata,
     destination: route.destination_iata,
@@ -86,7 +90,6 @@ async function processRoute(route, user) {
     priceData: bestFlight,
   });
 
-  // Update last checked
   await supabase
     .from('tracked_routes')
     .update({
@@ -95,7 +98,6 @@ async function processRoute(route, user) {
     })
     .eq('id', route.id);
 
-  // Analyze against baseline
   const analysis = await analyzePrice({
     origin: route.origin_iata,
     destination: route.destination_iata,
@@ -109,16 +111,21 @@ async function processRoute(route, user) {
     return;
   }
 
-  logger.debug(`Price analysis: R$${bestFlight.price_brl} vs R$${analysis.baseline} baseline (${analysis.discountPercent}% off)`, {
-    route: `${route.origin_iata}-${route.destination_iata}`,
-  });
+  logger.debug(
+    `Price analysis: R$${bestFlight.price_brl} vs R$${analysis.baseline} baseline (${analysis.discountPercent}% off)`,
+    {
+      route: `${route.origin_iata}-${route.destination_iata}`,
+    }
+  );
 
-  // Check if it's a deal
   if (analysis.is50Deal || analysis.is20Deal) {
-    logger.info(`🎯 DEAL DETECTED: ${route.origin_iata}-${route.destination_iata} ${analysis.discountPercent}% off`, {
-      price: bestFlight.price_brl,
-      baseline: analysis.baseline,
-    });
+    logger.info(
+      `🎯 DEAL DETECTED: ${route.origin_iata}-${route.destination_iata} ${analysis.discountPercent}% off`,
+      {
+        price: bestFlight.price_brl,
+        baseline: analysis.baseline,
+      }
+    );
 
     await dispatchDealAlert({
       user,

@@ -17,15 +17,13 @@ const telegramRoutes = require('./routes/telegram');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use('/notifications', notificationsRoutes);
-app.use('/telegram', telegramRoutes);
-
 // Security Middleware
 app.use(helmet());
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true,
 }));
+
 app.use(express.json({ limit: '10kb' }));
 
 // Global rate limiter
@@ -36,6 +34,7 @@ const limiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many requests, please try again later.' },
 });
+
 app.use('/api/', limiter);
 
 // Routes
@@ -44,6 +43,10 @@ app.use('/api/routes', routesRoutes);
 app.use('/api/prices', pricesRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/telegram', telegramRoutes);
+
+// (Opcional: manter sem duplicar mount fora do /api)
+app.use('/notifications', notificationsRoutes);
+app.use('/telegram', telegramRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -54,9 +57,10 @@ app.get('/health', (req, res) => {
 app.use((err, req, res, next) => {
   logger.error('Unhandled error:', err);
   res.status(err.status || 500).json({
-    error: process.env.NODE_ENV === 'production'
-      ? 'Internal server error'
-      : err.message,
+    error:
+      process.env.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
   });
 });
 
@@ -65,7 +69,11 @@ app.listen(PORT, () => {
   logger.info(`FareWatch backend running on port ${PORT}`);
 
   if (process.env.NODE_ENV !== 'test') {
-    startScheduler();
+    try {
+      startScheduler();
+    } catch (err) {
+      logger.error('Scheduler failed to start', err);
+    }
   }
 });
 

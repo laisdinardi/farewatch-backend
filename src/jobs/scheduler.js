@@ -4,9 +4,9 @@ const { logger } = require('../utils/logger');
 
 function startScheduler() {
   const cronExpression = process.env.PRICE_CHECK_CRON || '0 */8 * * *';
-  
+
   logger.info(`Starting price check scheduler: ${cronExpression}`);
-  
+
   // Schedule recurring job
   cron.schedule(cronExpression, async () => {
     logger.info('⏰ Scheduled price check triggered');
